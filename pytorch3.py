@@ -11,7 +11,7 @@ test = datasets.MNIST("", train=False, download=True,
 
 trainset = torch.utils.data.DataLoader(train, batch_size=10, shuffle=True)
 
-testset = torch.utils.data.DataLoader(test, batch_size=10, shuffle=True)
+testset = torch.utils.data.DataLoader(test, batch_size=10, shuffle=False)
 
 import torch.nn as nn
 import torch.nn.functional as F
@@ -53,4 +53,48 @@ print(output)
 
 import torch.optim as optim
 #optimizing the rate of how our model learns
-optimizer = optim.Adam(net.parameters())
+optimizer = optim.Adam(net.parameters(), lr=0.001)
+
+#EPOCHS are passes through datasets
+EPOCHS = 3
+
+for epoch in range(EPOCHS):
+    for data in trainset:
+        #data is a batch of featuressets and labels
+        X, y = data
+        #we batch to limit the incoming datasets
+        # 32 - 128 batch set helps us generalize.
+        #On a weak GPU we can't pass through more than 1 set of features at a time
+        net.zero_grad()
+        #          dimensions of image is 28 * 28
+        output = net(X.view(-1, 28*28))
+
+        #Calculate how wrong were we
+        loss = F.nll_loss(output, y)
+        #Two ways to calculate loss
+        #one is one hot vectors which is nll_loss()
+        #the other is mean square error
+
+
+        #BACK PROPAGATE OUR LOSS
+        loss.backward()
+        optimizer.step()
+
+    print(loss)
+
+correct = 0
+total = 0
+
+with torch.no_grad():
+    for data in trainset:
+        X, y = data
+        output = net(X.view(-1, 784))
+        for idx, i in enumerate(output):
+            if torch.argmax(i) == y[idx]:
+                correct += 1
+            total += 1
+print("Accuracy: ", round(correct/total, 3))
+
+plt.imshow(X[0].view(28,28))
+plt.show()
+print(torch.argmax(net(X[0].view(-1,784))[0]))
