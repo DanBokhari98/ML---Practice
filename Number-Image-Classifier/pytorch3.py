@@ -41,15 +41,17 @@ class Net(nn.Module):
         #dim is our distribution we want to solve to one
         return F.log_softmax(x, dim=1)
 
-net = Net()
-print(net)
+#net = Net()
+#print(net)
+
 
 X = torch.rand((28*28))
 X = X.view(1,28*28)
 
-output = net(X)
-print(output)
-
+#output = net(X)
+#print(output)
+net = torch.load("/Number-Image-classifier/")
+net.eval()
 
 import torch.optim as optim
 #optimizing the rate of how our model learns
@@ -80,7 +82,7 @@ for epoch in range(EPOCHS):
         loss.backward()
         optimizer.step()
 
-    print(loss)
+    #print(loss)
 
 correct = 0
 total = 0
@@ -94,6 +96,11 @@ with torch.no_grad():
                 correct += 1
             total += 1
 print("Accuracy: ", round(correct/total, 3))
+
+
+#torch.save(net,"/Number-Image-classifier/")
+
+
 
 plt.imshow(X[0].view(28,28))
 plt.show()
